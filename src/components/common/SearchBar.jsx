@@ -54,7 +54,7 @@ const SearchBar = ({
 
   // Mobile-first layout with responsive design
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-lg">
+    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-10 shadow-lg">
       {/* Main search section */}
       <div className="space-y-3 sm:space-y-4">
         {/* Search input row */}
