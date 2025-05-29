@@ -110,7 +110,6 @@ const SearchBar = ({
 
           <button
             onClick={onToggleMap}
-            disabled={mapLoaded}
             className={`flex-1 sm:flex-none px-3 sm:px-4 py-2.5 sm:py-3 text-white rounded-xl transition-colors border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
               showMap ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'
             }`}
