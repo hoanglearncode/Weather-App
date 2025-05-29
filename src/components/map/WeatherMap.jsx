@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { MAPBOX_TOKEN } from '../../utils/constants.jsx';
 import { getWeatherIconType, getWeatherIconForMarker } from '../../utils/weatherIcons.jsx';
+import { useGeolocation } from '../../hooks/useGeolocation';
 
 const WeatherMap = ({ 
   currentWeather, 
@@ -11,6 +12,23 @@ const WeatherMap = ({
   const mapContainer = useRef(null);
   const map = useRef(null);
   const marker = useRef(null);
+  const { currentLocation, getCurrentPosition, setCurrentLocation } = useGeolocation();
+  const [userLocation, setUserLocation] = useState({ lat: 21.0285, lng: 105.8542 }); // Default to Hanoi
+
+  // Get user's current location on component mount
+  useEffect(() => {
+    const initUserLocation = async () => {
+      try {
+        const location = await getCurrentPosition();
+        setUserLocation(location);
+      } catch (error) {
+        console.warn('Could not get user location, using default:', error);
+        // Keep default location (Hanoi)
+      }
+    };
+
+    initUserLocation();
+  }, [getCurrentPosition]);
 
   // Initialize Mapbox
   useEffect(() => {
@@ -32,13 +50,13 @@ const WeatherMap = ({
 
   // Initialize map when container is ready and mapbox is loaded
   useEffect(() => {
-    if (mapLoaded && mapContainer.current && !map.current && window.mapboxgl) {
+    if (mapLoaded && mapContainer.current && !map.current && window.mapboxgl && userLocation) {
       window.mapboxgl.accessToken = MAPBOX_TOKEN;
       
       map.current = new window.mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [106.68223, 10.762649],
+        center: [userLocation.lng, userLocation.lat], // Fixed: lng first, then lat
         zoom: 10,
         projection: 'globe'
       });
@@ -51,13 +69,35 @@ const WeatherMap = ({
         const { lng, lat } = e.lngLat;
         onMapClick(lat, lng);
       });
+
+      // Add a marker for user's current location if available
+      if (currentLocation) {
+        const userMarkerElement = document.createElement('div');
+        userMarkerElement.className = 'user-location-marker';
+        userMarkerElement.style.cssText = `
+          width: 20px;
+          height: 20px;
+          background: #ef4444;
+          border: 3px solid #ffffff;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        `;
+
+        new window.mapboxgl.Marker(userMarkerElement)
+          .setLngLat([currentLocation.lng, currentLocation.lat])
+          .setPopup(
+            new window.mapboxgl.Popup({ offset: 15 })
+              .setHTML('<div style="padding: 5px; text-align: center;"><strong>Your Location</strong></div>')
+          )
+          .addTo(map.current);
+      }
     }
-  }, [mapLoaded, onMapClick]);
+  }, [mapLoaded, userLocation, currentLocation, onMapClick]);
 
   // Update map marker when weather data changes
   useEffect(() => {
     if (map.current && currentWeather && currentWeather.coords && window.mapboxgl) {
-      // Remove existing marker
+      // Remove existing weather marker
       if (marker.current) {
         marker.current.remove();
       }
@@ -77,40 +117,61 @@ const WeatherMap = ({
         font-size: 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         cursor: pointer;
+        transition: transform 0.2s ease;
       `;
+      
+      // Add hover effect
+      markerElement.addEventListener('mouseenter', () => {
+        markerElement.style.transform = 'scale(1.1)';
+      });
+      markerElement.addEventListener('mouseleave', () => {
+        markerElement.style.transform = 'scale(1)';
+      });
       
       const weatherIcon = getWeatherIconType(currentWeather.condition);
       markerElement.innerHTML = getWeatherIconForMarker(weatherIcon);
 
-      // Create marker
+      // Create weather marker
       marker.current = new window.mapboxgl.Marker(markerElement)
         .setLngLat([currentWeather.coords.lon, currentWeather.coords.lat])
         .addTo(map.current);
 
-      // Create popup
+      // Create popup with more detailed weather info
       const popup = new window.mapboxgl.Popup({ offset: 25 })
         .setHTML(`
-          <div style="padding: 10px; text-align: center;">
-            <h3 style="margin: 0 0 5px 0; font-size: 16px; color: #1f2937;">${currentWeather.location}</h3>
-            <p style="margin: 0; font-size: 20px; font-weight: bold; color: #3b82f6;">${currentWeather.temperature}°C</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px; color: #6b7280; text-transform: capitalize;">${currentWeather.description}</p>
+          <div style="padding: 12px; text-align: center; min-width: 200px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: 600;">${currentWeather.location}</h3>
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+              <span style="font-size: 24px; margin-right: 8px;">${getWeatherIconForMarker(weatherIcon)}</span>
+              <span style="font-size: 24px; font-weight: bold; color: #3b82f6;">${currentWeather.temperature}°C</span>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: #6b7280; text-transform: capitalize;">${currentWeather.description}</p>
+            ${currentWeather.humidity ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af;">Humidity: ${currentWeather.humidity}%</p>` : ''}
           </div>
         `);
 
       marker.current.setPopup(popup);
 
-      // Fly to location
+      // Fly to weather location
       map.current.flyTo({
         center: [currentWeather.coords.lon, currentWeather.coords.lat],
         zoom: 12,
-        duration: 2000
+        duration: 2000,
+        essential: true
       });
     }
   }, [currentWeather]);
 
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
-      <h3 className="text-2xl font-bold text-white mb-4">Weather Map</h3>
+      <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
+        🗺️ Weather Map
+        {currentLocation && (
+          <span className="ml-2 text-sm font-normal text-white/70">
+            (📍 Your location detected)
+          </span>
+        )}
+      </h3>
       <div className="bg-gray-200 rounded-xl overflow-hidden" style={{ height: '600px' }}>
         {mapLoaded ? (
           <div 
@@ -126,9 +187,19 @@ const WeatherMap = ({
           </div>
         )}
       </div>
-      <p className="text-white/70 text-sm mt-2">
-        💡 Click anywhere on the map to get weather for that location
-      </p>
+      <div className="flex items-center justify-between mt-3">
+        <p className="text-white/70 text-sm">
+          💡 Click anywhere on the map to get weather for that location
+        </p>
+        {!currentLocation && (
+          <button 
+            onClick={getCurrentPosition}
+            className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-full transition-colors"
+          >
+            📍 Get My Location
+          </button>
+        )}
+      </div>
     </div>
   );
 };

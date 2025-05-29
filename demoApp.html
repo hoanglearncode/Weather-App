@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Travel Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out',
+                        'slideInLeft': 'slideInLeft 0.8s ease-out',
+                        'slideInRight': 'slideInRight 0.8s ease-out'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans">
+    <!-- Animated Background Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
+        <div class="absolute top-1/4 right-20 w-16 h-16 bg-white/5 rounded-full animate-float" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-24 h-24 bg-white/5 rounded-full animate-float" style="animation-delay: -4s;"></div>
+        <div class="absolute bottom-1/3 right-10 w-12 h-12 bg-white/10 rounded-full animate-float" style="animation-delay: -1s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 relative z-10">
+        <!-- Header -->
+        <header class="text-center mb-12 animate-fadeInUp">
+            <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+                🌤️ Weather & Travel
+            </h1>
+            <p class="text-xl text-white/90 max-w-2xl mx-auto">
+                Khám phá thời tiết và địa điểm du lịch tuyệt vời trên khắp thế giới
+            </p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="max-w-md mx-auto mb-12 animate-fadeInUp" style="animation-delay: 0.2s;">
+            <div class="glass rounded-full p-2">
+                <div class="flex items-center px-4">
+                    <svg class="w-5 h-5 text-white/70 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" placeholder="Tìm kiếm thành phố..." 
+                           class="flex-1 bg-transparent text-white placeholder-white/70 outline-none py-3" 
+                           id="citySearch">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <!-- Weather Card -->
+            <div class="glass rounded-3xl p-8 hover:scale-105 transition-all duration-500 animate-slideInLeft">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white">Thời Tiết Hiện Tại</h2>
+                    <div class="text-4xl animate-pulse-slow">☀️</div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/80">Địa điểm:</span>
+                        <span class="text-white font-semibold" id="currentLocation">Hà Nội, Việt Nam</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-center my-8">
+                        <div class="text-6xl font-bold text-white" id="temperature">28°C</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">💧</div>
+                            <div class="text-white/80 text-sm">Độ ẩm</div>
+                            <div class="text-white font-bold" id="humidity">65%</div>
+                        </div>
+                        <div class="glass rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">💨</div>
+                            <div class="text-white/80 text-sm">Gió</div>
+                            <div class="text-white font-bold" id="windSpeed">12 km/h</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-white/80 text-sm">Tình trạng</div>
+                        <div class="text-white font-semibold" id="weatherCondition">Nắng đẹp</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Travel Recommendations -->
+            <div class="glass rounded-3xl p-8 hover:scale-105 transition-all duration-500 animate-slideInRight">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white">Gợi Ý Du Lịch</h2>
+                    <div class="text-4xl animate-float">✈️</div>
+                </div>
+                
+                <div class="space-y-4" id="travelRecommendations">
+                    <div class="glass rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-2xl">🏖️</div>
+                            <div>
+                                <h3 class="text-white font-semibold">Hạ Long Bay</h3>
+                                <p class="text-white/80 text-sm">Vịnh đẹp nhất Việt Nam</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-2xl">🏔️</div>
+                            <div>
+                                <h3 class="text-white font-semibold">Sa Pa</h3>
+                                <p class="text-white/80 text-sm">Ruộng bậc thang tuyệt đẹp</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-2xl">🏛️</div>
+                            <div>
+                                <h3 class="text-white font-semibold">Hội An</h3>
+                                <p class="text-white/80 text-sm">Phố cổ lãng mạn</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full mt-6 glass rounded-xl py-3 text-white font-semibold hover:bg-white/20 transition-all">
+                    Xem thêm địa điểm 🔍
+                </button>
+            </div>
+        </div>
+
+        <!-- Weather Forecast -->
+        <div class="glass rounded-3xl p-8 mb-12 animate-fadeInUp" style="animation-delay: 0.4s;">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Dự Báo 7 Ngày Tới</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Hôm nay</div>
+                    <div class="text-2xl mb-2">☀️</div>
+                    <div class="text-white font-bold">28°</div>
+                    <div class="text-white/60 text-sm">22°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Thứ 6</div>
+                    <div class="text-2xl mb-2">⛅</div>
+                    <div class="text-white font-bold">26°</div>
+                    <div class="text-white/60 text-sm">20°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Thứ 7</div>
+                    <div class="text-2xl mb-2">🌧️</div>
+                    <div class="text-white font-bold">24°</div>
+                    <div class="text-white/60 text-sm">18°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">CN</div>
+                    <div class="text-2xl mb-2">🌦️</div>
+                    <div class="text-white font-bold">25°</div>
+                    <div class="text-white/60 text-sm">19°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Thứ 2</div>
+                    <div class="text-2xl mb-2">☀️</div>
+                    <div class="text-white font-bold">29°</div>
+                    <div class="text-white/60 text-sm">23°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Thứ 3</div>
+                    <div class="text-2xl mb-2">☀️</div>
+                    <div class="text-white font-bold">31°</div>
+                    <div class="text-white/60 text-sm">25°</div>
+                </div>
+                
+                <div class="glass rounded-xl p-4 text-center hover:scale-110 transition-all">
+                    <div class="text-white/80 text-sm mb-2">Thứ 4</div>
+                    <div class="text-2xl mb-2">⛅</div>
+                    <div class="text-white font-bold">27°</div>
+                    <div class="text-white/60 text-sm">21°</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Travel Tips -->
+        <div class="glass rounded-3xl p-8 animate-fadeInUp" style="animation-delay: 0.6s;">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Lời Khuyên Du Lịch</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass rounded-xl p-6 hover:scale-105 transition-all">
+                    <div class="text-3xl mb-4 text-center">🎒</div>
+                    <h3 class="text-white font-semibold mb-2 text-center">Chuẩn Bị</h3>
+                    <p class="text-white/80 text-sm text-center">Kiểm tra thời tiết trước khi đi để chuẩn bị trang phục phù hợp</p>
+                </div>
+                
+                <div class="glass rounded-xl p-6 hover:scale-105 transition-all">
+                    <div class="text-3xl mb-4 text-center">📱</div>
+                    <h3 class="text-white font-semibold mb-2 text-center">Ứng Dụng</h3>
+                    <p class="text-white/80 text-sm text-center">Tải ứng dụng bản đồ offline và dự báo thời tiết chi tiết</p>
+                </div>
+                
+                <div class="glass rounded-xl p-6 hover:scale-105 transition-all">
+                    <div class="text-3xl mb-4 text-center">☂️</div>
+                    <h3 class="text-white font-semibold mb-2 text-center">An Toàn</h3>
+                    <p class="text-white/80 text-sm text-center">Luôn mang theo đồ che mưa và kem chống nắng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate weather data update
+        const cities = [
+            { name: 'Hà Nội, Việt Nam', temp: 28, humidity: 65, wind: 12, condition: 'Nắng đẹp' },
+            { name: 'TP.HCM, Việt Nam', temp: 32, humidity: 78, wind: 8, condition: 'Nắng nóng' },
+            { name: 'Đà Nẵng, Việt Nam', temp: 26, humidity: 70, wind: 15, condition: 'Nhiều mây' },
+            { name: 'Bangkok, Thái Lan', temp: 35, humidity: 80, wind: 6, condition: 'Nắng gắt' },
+            { name: 'Singapore', temp: 30, humidity: 85, wind: 10, condition: 'Mưa rào' }
+        ];
+
+        const travelDestinations = [
+            [
+                { icon: '🏖️', name: 'Hạ Long Bay', desc: 'Vịnh đẹp nhất Việt Nam' },
+                { icon: '🏔️', name: 'Sa Pa', desc: 'Ruộng bậc thang tuyệt đẹp' },
+                { icon: '🏛️', name: 'Hội An', desc: 'Phố cổ lãng mạn' }
+            ],
+            [
+                { icon: '🏙️', name: 'Bangkok', desc: 'Thủ đô sôi động Thái Lan' },
+                { icon: '🏝️', name: 'Phuket', desc: 'Đảo thiên đường' },
+                { icon: '🛕', name: 'Angkor Wat', desc: 'Di sản thế giới Cambodia' }
+            ]
+        ];
+
+        let currentCityIndex = 0;
+        let currentDestinationSet = 0;
+
+        function updateWeatherData() {
+            const city = cities[currentCityIndex];
+            document.getElementById('currentLocation').textContent = city.name;
+            document.getElementById('temperature').textContent = city.temp + '°C';
+            document.getElementById('humidity').textContent = city.humidity + '%';
+            document.getElementById('windSpeed').textContent = city.wind + ' km/h';
+            document.getElementById('weatherCondition').textContent = city.condition;
+            
+            currentCityIndex = (currentCityIndex + 1) % cities.length;
+        }
+
+        function updateTravelRecommendations() {
+            const destinations = travelDestinations[currentDestinationSet];
+            const container = document.getElementById('travelRecommendations');
+            
+            container.innerHTML = destinations.map(dest => `
+                <div class="glass rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
+                    <div class="flex items-center space-x-3">
+                        <div class="text-2xl">${dest.icon}</div>
+                        <div>
+                            <h3 class="text-white font-semibold">${dest.name}</h3>
+                            <p class="text-white/80 text-sm">${dest.desc}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            currentDestinationSet = (currentDestinationSet + 1) % travelDestinations.length;
+        }
+
+        // Search functionality
+        document.getElementById('citySearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = e.target.value.toLowerCase();
+                const foundCity = cities.find(city => 
+                    city.name.toLowerCase().includes(searchTerm)
+                );
+                
+                if (foundCity) {
+                    document.getElementById('currentLocation').textContent = foundCity.name;
+                    document.getElementById('temperature').textContent = foundCity.temp + '°C';
+                    document.getElementById('humidity').textContent = foundCity.humidity + '%';
+                    document.getElementById('windSpeed').textContent = foundCity.wind + ' km/h';
+                    document.getElementById('weatherCondition').textContent = foundCity.condition;
+                }
+                e.target.value = '';
+            }
+        });
+
+        // Auto-update data every 10 seconds
+        setInterval(updateWeatherData, 100000000);
+        setInterval(updateTravelRecommendations, 15000);
+
+        // Add click animations
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.glass')) {
+                const element = e.target.closest('.glass');
+                element.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    element.style.transform = '';
+                }, 150);
+            }
+        });
+    </script>
+</body>
+</html>
