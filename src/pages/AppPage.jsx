@@ -10,6 +10,7 @@ import Footer from '../components/layout/Footer';
 import { useWeatherData } from '../hooks/useWeatherData';
 import { useGeolocation } from '../hooks/useGeolocation';
 import ActivityPage from './ActivityPage';
+import { AppContext } from '../hooks/useActivity';
 
 const App = () => {
   const {
@@ -25,7 +26,7 @@ const App = () => {
   const { currentLocation, getCurrentPosition, setCurrentLocation } = useGeolocation();
   const [showMap, setShowMap] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [tab, setTab] = useState(true);
+  const {tab, setTab  } = React.useContext(AppContext);
   // Handle search
   const handleSearch = (query) => {
     searchWeatherByCity(query);

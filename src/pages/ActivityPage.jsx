@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cloud, Sun, CloudRain, Snowflake, MapPin, Grid, List, Star, Clock, Users } from 'lucide-react';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ActivityCard from '../components/activity/ActivityCard';
 
 const ActivityPage = ({weathers, mode}) => {
     const [weather, setWeather] = useState(null);
@@ -185,78 +187,17 @@ const ActivityPage = ({weathers, mode}) => {
         simulateAPICall();
     }, []);
 
-    const ActivityCard = ({ activity, isGridView }) => (
-        <div className={`bg-white/10 rounded-xl text-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group ${
-            isGridView ? 'hover:scale-105' : 'hover:translate-x-2'
-        }`}>
-            <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="text-4xl mb-2">{activity.image}</div>
-                    <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">{activity.rating}</span>
-                    </div>
-                </div>
-                
-                <h3 className="text-lg font-bold mb-2 group-hover:text-blue-600 transition-colors">
-                    {activity.title}
-                </h3>
-                
-                <p className="text-sm mb-4 line-clamp-2">
-                    {activity.description}
-                </p>
-                
-                <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm ">
-                        <Clock className="w-4 h-4 mr-2" />
-                        <span>{activity.duration}</span>
-                    </div>
-                    <div className="flex items-center text-sm ">
-                        <Users className="w-4 h-4 mr-2" />
-                        <span>{activity.participants}</span>
-                    </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        activity.source === 'ml_prediction' 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-green-100 text-green-800'
-                    }`}>
-                        {activity.source === 'ml_prediction' ? 'AI Đề xuất' : 'Phổ biến'}
-                    </span>
-                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                        {activity.category}
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
+    
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white/10 rounded-2xl flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Đang phân tích thời tiết và tạo đề xuất...</p>
-                </div>
-            </div>
+            <LoadingSpinner text='Đang phân tích thời tiết và tạo đề xuất...'/>
         );
     }
 
     return (
         <div className="min-h-screen bg-white/10 backdrop-blur-md rounded-2xl text-white">
             <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-white mb-4">
-                        Hoạt Động Được Đề Xuất
-                    </h1>
-                    <p className="text-white max-w-2xl mx-auto">
-                        Dựa trên dữ liệu thời tiết thời gian thực và thuật toán học máy để đề xuất những hoạt động phù hợp nhất
-                    </p>
-                </div>
-
                 {/* Weather & Location Info */}
                 <div className="bg-white/10 rounded-xl shadow-lg p-6 mb-8">
                     <div className="flex items-center justify-between flex-wrap gap-4">
@@ -288,30 +229,6 @@ const ActivityPage = ({weathers, mode}) => {
                             isGridView={viewMode === 'grid'} 
                         />
                     ))}
-                </div>
-
-                {/* Footer Info */}
-                <div className="mt-12 text-center text-white">   
-                    <div className="bg-white/10 rounded-xl shadow-lg p-6 text-white">
-                        <h3 className="text-lg font-semibold mb-2">
-                            Cách hoạt động
-                        </h3>
-                        <p className="text-sm max-w-3xl mx-auto">
-                            Hệ thống sử dụng dữ liệu thời tiết từ OpenWeather API kết hợp với thuật toán học máy 
-                            để dự đoán và cào dữ liệu từ các trang web địa phương, tạo ra những đề xuất hoạt động 
-                            phù hợp nhất với điều kiện thời tiết và vị trí của bạn.
-                        </p>
-                        <div className="flex justify-center space-x-6 mt-4 text-sm">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                <span className="">AI Đề xuất từ ML</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span className="">Dữ liệu từ Web</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
