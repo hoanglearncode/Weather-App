@@ -23,6 +23,7 @@ const App = () => {
     setError
   } = useWeatherData();
 
+  console.log('Current Weather:', currentWeather);
   const { currentLocation, getCurrentPosition, setCurrentLocation } = useGeolocation();
   const [showMap, setShowMap] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
